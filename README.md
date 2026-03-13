@@ -52,7 +52,7 @@ El proyecto ya queda preparado para subirlo a GitHub con una base simple de CI/C
 
 - `/.github/workflows/ci.yml`: valida backend y frontend en cada `push` y `pull_request`.
 - `/.github/workflows/release-artifacts.yml`: en `main` o manualmente genera artefactos del frontend y backend.
-- `/.github/workflows/deploy-frontend-static.yml`: despliegue manual del frontend estático a hosting por SSH/SFTP.
+- `/netlify.toml`: configuracion de build y routing para desplegar el frontend en Netlify.
 
 ### Que valida CI
 
@@ -76,9 +76,9 @@ El flujo actual resuelve integracion continua y entrega de artefactos. El despli
 
 Consulta `DEPLOYMENT.md` para la estrategia recomendada:
 
-- frontend estático en hosting tradicional
+- frontend en Netlify desde GitHub
 - backend FastAPI en hosting compatible con Python
-- secretos esperados para GitHub Actions
+- variable de entorno `VITE_API_BASE_URL` configurada en Netlify
 
 ## Estado actual
 
