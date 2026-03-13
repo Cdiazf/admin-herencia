@@ -52,6 +52,7 @@ El proyecto ya queda preparado para subirlo a GitHub con una base simple de CI/C
 
 - `/.github/workflows/ci.yml`: valida backend y frontend en cada `push` y `pull_request`.
 - `/.github/workflows/release-artifacts.yml`: en `main` o manualmente genera artefactos del frontend y backend.
+- `/.github/workflows/deploy-frontend-static.yml`: despliegue manual del frontend estático a hosting por SSH/SFTP.
 
 ### Que valida CI
 
@@ -70,6 +71,14 @@ El proyecto ya queda preparado para subirlo a GitHub con una base simple de CI/C
 3. Configura el flujo de despliegue final segun tu hosting.
 
 El flujo actual resuelve integracion continua y entrega de artefactos. El despliegue final depende del proveedor donde alojes frontend y backend.
+
+## Produccion
+
+Consulta `DEPLOYMENT.md` para la estrategia recomendada:
+
+- frontend estático en hosting tradicional
+- backend FastAPI en hosting compatible con Python
+- secretos esperados para GitHub Actions
 
 ## Estado actual
 
