@@ -67,6 +67,49 @@ Recommended options:
 - Fly.io
 - any server where `uvicorn` or `gunicorn` can run persistently
 
+## Temporary Backend With ngrok
+
+If you need a temporary public backend while the frontend is already on Netlify, you can expose your local FastAPI server with `ngrok`.
+
+### Backend Environment
+
+Set `FRONTEND_ORIGINS_RAW` in `backend/.env` with the origins that are allowed to call the API.
+
+Example:
+
+```env
+FRONTEND_ORIGINS_RAW=http://localhost:5173,https://admin-herencia.netlify.app
+```
+
+### Local Run
+
+Start the backend locally:
+
+```bash
+cd backend
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Expose it with ngrok:
+
+```bash
+ngrok http 8000
+```
+
+Take the public HTTPS URL from ngrok, for example:
+
+```text
+https://example.ngrok-free.app
+```
+
+Then set in Netlify:
+
+```env
+VITE_API_BASE_URL=https://example.ngrok-free.app/api
+```
+
+This is valid for demos and testing, but not for stable production use.
+
 ## Important Notes
 
 - `backend/.env` is intentionally excluded from Git.

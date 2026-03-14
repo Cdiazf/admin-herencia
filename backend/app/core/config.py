@@ -13,18 +13,24 @@ class Settings(BaseSettings):
     default_user_username: str = "usuario"
     default_user_password: str = "usuario123"
     default_user_full_name: str = "Usuario Base"
-    frontend_origins: list[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-    ]
+    frontend_origins_raw: str = ",".join(
+        [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5174",
+        ]
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    @property
+    def frontend_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.frontend_origins_raw.split(",") if origin.strip()]
 
 
 settings = Settings()

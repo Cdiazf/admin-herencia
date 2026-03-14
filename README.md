@@ -79,6 +79,7 @@ Consulta `DEPLOYMENT.md` para la estrategia recomendada:
 - frontend en Netlify desde GitHub
 - backend FastAPI en hosting compatible con Python
 - variable de entorno `VITE_API_BASE_URL` configurada en Netlify
+- soporte para `FRONTEND_ORIGINS_RAW` si expones temporalmente el backend con `ngrok`
 
 ## Estado actual
 
