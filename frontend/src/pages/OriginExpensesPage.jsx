@@ -16,10 +16,18 @@ const initialForm = {
   notes: ""
 };
 
+function formatPenAmount(amount) {
+  return new Intl.NumberFormat("es-PE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Number(amount || 0));
+}
+
 export default function OriginExpensesPage() {
   const [origins, setOrigins] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [selectedOriginId, setSelectedOriginId] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
   const [message, setMessage] = useState("");
@@ -125,10 +133,28 @@ export default function OriginExpensesPage() {
     setForm(initialForm);
   }
 
+  const visibleExpenses = useMemo(() => {
+    if (!selectedMonth) {
+      return expenses;
+    }
+    return expenses.filter((item) => item.expense_date.startsWith(selectedMonth));
+  }, [expenses, selectedMonth]);
+
   const totalExpenses = useMemo(
-    () => expenses.reduce((total, item) => total + Number(item.amount), 0),
-    [expenses]
+    () => visibleExpenses.reduce((total, item) => total + Number(item.amount), 0),
+    [visibleExpenses]
   );
+
+  const selectedMonthLabel = useMemo(() => {
+    if (!selectedMonth) {
+      return "todos los meses";
+    }
+    const [year, month] = selectedMonth.split("-");
+    return new Intl.DateTimeFormat("es-PE", {
+      month: "long",
+      year: "numeric"
+    }).format(new Date(Number(year), Number(month) - 1, 1));
+  }, [selectedMonth]);
 
   return (
     <section className="page-card">
@@ -140,24 +166,37 @@ export default function OriginExpensesPage() {
       <div className="catalog-section">
         <div className="dashboard-kpi-grid">
           <article className="dashboard-kpi-card dashboard-kpi-card--accent">
-            <span>Total registrado</span>
-            <strong>${totalExpenses.toFixed(2)}</strong>
-            <small>{expenses.length} gasto(s) cargados</small>
+            <span>Total registrado del mes</span>
+            <strong>S/. {formatPenAmount(totalExpenses)}</strong>
+            <small>
+              {visibleExpenses.length} gasto(s) cargados en {selectedMonthLabel}
+            </small>
           </article>
         </div>
       </div>
 
-      <label className="field-stack">
-        <span>Filtrar por conferencia</span>
-        <select className="form-select search-input" value={selectedOriginId} onChange={handleFilterChange}>
-          <option value="">Todas las conferencias</option>
-          {origins.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="form-grid compact-grid">
+        <label className="field-stack">
+          <span>Filtrar por conferencia</span>
+          <select className="form-select search-input" value={selectedOriginId} onChange={handleFilterChange}>
+            <option value="">Todas las conferencias</option>
+            {origins.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="field-stack">
+          <span>Filtrar por mes</span>
+          <input
+            className="form-control search-input"
+            type="month"
+            value={selectedMonth}
+            onChange={(event) => setSelectedMonth(event.target.value)}
+          />
+        </label>
+      </div>
 
       <form className="form-grid compact-grid" onSubmit={handleSubmit}>
         <select className="form-select" name="origin_id" value={form.origin_id} onChange={handleChange} required>
@@ -225,17 +264,17 @@ export default function OriginExpensesPage() {
           </tr>
         </thead>
         <tbody>
-          {expenses.length === 0 ? (
+          {visibleExpenses.length === 0 ? (
             <tr>
               <td colSpan="6">No hay gastos registrados.</td>
             </tr>
           ) : null}
-          {expenses.map((expense) => (
+          {visibleExpenses.map((expense) => (
             <tr key={expense.id}>
               <td>{origins.find((item) => item.id === expense.origin_id)?.name || "Conferencia"}</td>
               <td>{expense.concept}</td>
               <td>{new Date(`${expense.expense_date}T00:00:00`).toLocaleDateString()}</td>
-              <td>${Number(expense.amount).toFixed(2)}</td>
+              <td>S/. {formatPenAmount(expense.amount)}</td>
               <td>{expense.notes || "-"}</td>
               <td>
                 <button type="button" className="btn btn-sm btn-outline-primary icon-button" onClick={() => handleEdit(expense)} title="Editar gasto" aria-label="Editar gasto">
@@ -251,13 +290,13 @@ export default function OriginExpensesPage() {
       </table>
 
       <div className="mobile-only mobile-list">
-        {expenses.length === 0 ? <p>No hay gastos registrados.</p> : null}
-        {expenses.map((expense) => (
+        {visibleExpenses.length === 0 ? <p>No hay gastos registrados.</p> : null}
+        {visibleExpenses.map((expense) => (
           <article key={expense.id} className="mini-card shadow-sm">
             <strong>{expense.concept}</strong>
             <span>Conferencia: {origins.find((item) => item.id === expense.origin_id)?.name || "Conferencia"}</span>
             <span>Fecha: {new Date(`${expense.expense_date}T00:00:00`).toLocaleDateString()}</span>
-            <span>Monto: ${Number(expense.amount).toFixed(2)}</span>
+            <span>Monto: S/. {formatPenAmount(expense.amount)}</span>
             <span>Notas: {expense.notes || "-"}</span>
             <div>
               <button type="button" className="btn btn-sm btn-outline-primary icon-button" onClick={() => handleEdit(expense)} title="Editar gasto" aria-label="Editar gasto">
