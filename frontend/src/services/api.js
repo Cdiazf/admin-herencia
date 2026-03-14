@@ -16,6 +16,11 @@ function buildHeaders(includeJson = false) {
     headers["Content-Type"] = "application/json";
   }
 
+  // ngrok free domains may return an HTML interstitial unless this header is sent.
+  if (API_BASE_URL.includes("ngrok")) {
+    headers["ngrok-skip-browser-warning"] = "true";
+  }
+
   if (auth?.accessToken) {
     headers.Authorization = `Bearer ${auth.accessToken}`;
   }
@@ -24,14 +29,23 @@ function buildHeaders(includeJson = false) {
 }
 
 async function parseResponse(response, fallbackMessage) {
+  const contentType = response.headers.get("content-type") || "";
+
   if (response.ok) {
     if (response.status === 204) {
       return null;
     }
+
+    if (!contentType.includes("application/json")) {
+      throw new Error("El backend devolvio una respuesta no valida. Revisa VITE_API_BASE_URL o la configuracion de ngrok.");
+    }
+
     return response.json();
   }
 
-  const error = await response.json().catch(() => null);
+  const error = contentType.includes("application/json")
+    ? await response.json().catch(() => null)
+    : null;
   if (response.status === 401) {
     clearStoredAuth();
   }
