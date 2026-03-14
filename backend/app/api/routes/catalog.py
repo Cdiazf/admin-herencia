@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.models.advisor import Advisor
 from app.models.event import Event
 from app.models.origin import Origin
+from app.models.origin_expense import OriginExpense
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.catalog import (
@@ -15,6 +16,9 @@ from app.schemas.catalog import (
     EventCreate,
     EventResponse,
     OriginCreate,
+    OriginExpenseCreate,
+    OriginExpenseResponse,
+    OriginExpenseUpdate,
     OriginResponse,
     ProductResponse,
 )
@@ -101,3 +105,73 @@ def create_event(
     db.commit()
     db.refresh(event)
     return event
+
+
+@router.get("/origin-expenses", response_model=list[OriginExpenseResponse])
+def list_origin_expenses(
+    origin_id: int | None = None,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_user),
+) -> list[OriginExpense]:
+    query = select(OriginExpense).order_by(OriginExpense.expense_date.desc(), OriginExpense.id.desc())
+    if origin_id is not None:
+        query = query.where(OriginExpense.origin_id == origin_id)
+    return db.scalars(query).all()
+
+
+@router.post("/origin-expenses", response_model=OriginExpenseResponse)
+def create_origin_expense(
+    payload: OriginExpenseCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> OriginExpense:
+    origin = db.scalar(select(Origin).where(Origin.id == payload.origin_id))
+    if not origin:
+        raise HTTPException(status_code=404, detail="Conferencia no encontrada")
+
+    expense = OriginExpense(
+        origin_id=payload.origin_id,
+        concept=payload.concept.strip(),
+        amount=round(payload.amount, 2),
+        expense_date=payload.expense_date,
+        notes=payload.notes.strip(),
+    )
+    db.add(expense)
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+@router.put("/origin-expenses/{expense_id}", response_model=OriginExpenseResponse)
+def update_origin_expense(
+    expense_id: int,
+    payload: OriginExpenseUpdate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> OriginExpense:
+    expense = db.scalar(select(OriginExpense).where(OriginExpense.id == expense_id))
+    if not expense:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+
+    expense.concept = payload.concept.strip()
+    expense.amount = round(payload.amount, 2)
+    expense.expense_date = payload.expense_date
+    expense.notes = payload.notes.strip()
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+@router.delete("/origin-expenses/{expense_id}")
+def delete_origin_expense(
+    expense_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict[str, str]:
+    expense = db.scalar(select(OriginExpense).where(OriginExpense.id == expense_id))
+    if not expense:
+        raise HTTPException(status_code=404, detail="Gasto no encontrado")
+
+    db.delete(expense)
+    db.commit()
+    return {"message": "Gasto eliminado"}

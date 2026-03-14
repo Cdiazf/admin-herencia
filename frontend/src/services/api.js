@@ -265,3 +265,37 @@ export async function createEvent(payload) {
   });
   return parseResponse(response, "No se pudo crear el evento");
 }
+
+export async function getOriginExpenses(originId) {
+  const suffix = originId ? `?origin_id=${originId}` : "";
+  const response = await fetch(`${API_BASE_URL}/origin-expenses${suffix}`, {
+    headers: buildHeaders()
+  });
+  return parseResponse(response, "No se pudo cargar la lista de gastos");
+}
+
+export async function createOriginExpense(payload) {
+  const response = await fetch(`${API_BASE_URL}/origin-expenses`, {
+    method: "POST",
+    headers: buildHeaders(true),
+    body: JSON.stringify(payload)
+  });
+  return parseResponse(response, "No se pudo registrar el gasto");
+}
+
+export async function updateOriginExpense(expenseId, payload) {
+  const response = await fetch(`${API_BASE_URL}/origin-expenses/${expenseId}`, {
+    method: "PUT",
+    headers: buildHeaders(true),
+    body: JSON.stringify(payload)
+  });
+  return parseResponse(response, "No se pudo actualizar el gasto");
+}
+
+export async function deleteOriginExpense(expenseId) {
+  const response = await fetch(`${API_BASE_URL}/origin-expenses/${expenseId}`, {
+    method: "DELETE",
+    headers: buildHeaders()
+  });
+  return parseResponse(response, "No se pudo eliminar el gasto");
+}

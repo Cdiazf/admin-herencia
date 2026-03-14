@@ -19,6 +19,7 @@ export default function AppShell({ children }) {
     { to: "/origenes", label: "Origenes", icon: "bi-diagram-3" },
     { to: "/vendedores", label: "Vendedores", icon: "bi-people" },
     { to: "/eventos", label: "Eventos", icon: "bi-calendar-event" },
+    { to: "/gastos-conferencias", label: "Gastos Conferencias", icon: "bi-receipt-cutoff" },
     { to: "/usuarios", label: "Usuarios", icon: "bi-person-gear" }
   ];
 

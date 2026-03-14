@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -44,3 +46,29 @@ class EventResponse(BaseModel):
     id: int
     name: str
     product_id: int | None
+
+
+class OriginExpenseCreate(BaseModel):
+    origin_id: int
+    concept: str = Field(min_length=1, max_length=160)
+    amount: float = Field(gt=0)
+    expense_date: date
+    notes: str = Field(default="", max_length=500)
+
+
+class OriginExpenseUpdate(BaseModel):
+    concept: str = Field(min_length=1, max_length=160)
+    amount: float = Field(gt=0)
+    expense_date: date
+    notes: str = Field(default="", max_length=500)
+
+
+class OriginExpenseResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    origin_id: int
+    concept: str
+    amount: float
+    expense_date: date
+    notes: str

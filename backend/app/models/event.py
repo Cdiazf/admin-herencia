@@ -13,4 +13,3 @@ class Event(Base):
 
     product: Mapped["Product | None"] = relationship(back_populates="events")
     sales: Mapped[list["Sale"]] = relationship(back_populates="event")
-

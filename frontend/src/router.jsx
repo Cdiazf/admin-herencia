@@ -9,6 +9,7 @@ import EventsPage from "./pages/EventsPage";
 import InitialDashboardPage from "./pages/InitialDashboardPage";
 import InitialCollectionsPage from "./pages/InitialCollectionsPage";
 import LoginPage from "./pages/LoginPage";
+import OriginExpensesPage from "./pages/OriginExpensesPage";
 import OriginsPage from "./pages/OriginsPage";
 import SalesPage from "./pages/SalesPage";
 import UsersPage from "./pages/UsersPage";
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
           { path: "origenes", element: <OriginsPage /> },
           { path: "vendedores", element: <AdvisorsPage /> },
           { path: "eventos", element: <EventsPage /> },
+          { path: "gastos-conferencias", element: <OriginExpensesPage /> },
           { path: "usuarios", element: <UsersPage /> }
         ]
       }
